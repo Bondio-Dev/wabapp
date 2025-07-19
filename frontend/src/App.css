@@ -1,0 +1,191 @@
+.App {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f2f5;
+  overflow: hidden;
+}
+
+/* Мобильная адаптация */
+.App.mobile {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Стили для AMO CRM виджета */
+.App.amo-widget {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* Адаптивность для разных размеров экранов */
+@media (max-width: 768px) {
+  .App {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .App {
+    font-size: 13px;
+  }
+}
+
+/* Общие стили для чата */
+.chat-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.chat-sidebar {
+  width: 350px;
+  min-width: 300px;
+  border-right: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #e5ddd5;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="1" fill="%23ffffff" opacity="0.05"/></svg>');
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .chat-container {
+    flex-direction: column;
+  }
+
+  .chat-sidebar {
+    width: 100%;
+    min-width: unset;
+    height: 50vh;
+  }
+
+  .chat-main {
+    flex: 1;
+    min-height: 50vh;
+  }
+
+  .chat-sidebar.hidden {
+    display: none;
+  }
+
+  .chat-main.full {
+    height: 100vh;
+  }
+}
+
+/* Анимации */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Скроллбары */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a8a8;
+}
+
+/* Утилиты */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickable:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Загрузочные состояния */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Статусы сообщений */
+.message-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.message-status.sent {
+  color: #999;
+}
+
+.message-status.delivered {
+  color: #4fc3f7;
+}
+
+.message-status.read {
+  color: #25d366;
+}
+
+.message-status.failed {
+  color: #f44336;
+}

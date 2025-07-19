@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#25d366" />
+  <meta name="description" content="WhatsApp Business API клиент с AMO CRM интеграцией" />
+
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="WhatsApp CRM">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <!-- Preload fonts -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+  <title>WhatsApp Business CRM</title>
+
+  <style>
+    /* Предзагрузка и стили для предотвращения мерцания */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #f0f2f5;
+      overflow-x: hidden;
+    }
+
+    /* Загрузочный экран */
+    #root {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Мобильная адаптация */
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    /* Стили для AMO CRM виджета */
+    .amo-widget {
+      height: 100vh !important;
+      overflow: hidden;
+    }
+
+    .amo-widget body {
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+      <h2>Для работы этого приложения необходимо включить JavaScript</h2>
+      <p>Please enable JavaScript to run this application.</p>
+    </div>
+  </noscript>
+
+  <div id="root">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Скрипт для определения AMO CRM виджета -->
+  <script>
+    // Проверяем, загружается ли страница внутри AMO CRM
+    if (window.parent !== window && document.referrer.includes('amocrm')) {
+      document.body.classList.add('amo-widget');
+
+      // Уведомляем родительское окно о готовности
+      window.parent.postMessage({
+        type: 'widget_loaded',
+        data: { ready: true }
+      }, '*');
+    }
+
+    // Обработчик сообщений от AMO CRM
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'amo_data') {
+        // Сохраняем данные AMO для использования в React
+        window.amoData = event.data.data;
+      }
+    });
+  </script>
+</body>
+</html>
