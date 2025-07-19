@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Копируем package.json
 COPY package*.json ./
-RUN npm ci
+RUN npm install --omit=dev
 
 # Копируем исходники и собираем
 COPY . .

@@ -1,41 +1,14 @@
 {
   "name": "whatsapp-amocrm-frontend",
   "version": "1.0.0",
-  "description": "WhatsApp Business API клиент с AMO CRM интеграцией - Frontend",
+  "description": "WhatsApp Business API и AMO CRM Web Messenger — фронтенд",
   "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.11.0",
-    "axios": "^1.4.0",
-    "socket.io-client": "^4.6.2",
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
-    "@mui/material": "^5.13.0",
-    "@mui/icons-material": "^5.13.0",
-    "@mui/lab": "^5.0.0-alpha.130",
-    "react-window": "^1.8.8",
-    "react-window-infinite-loader": "^1.0.9",
-    "date-fns": "^2.30.0",
-    "emoji-picker-react": "^4.4.9",
-    "react-dropzone": "^14.2.3",
-    "react-hotkeys-hook": "^4.4.0",
-    "workbox-webpack-plugin": "^6.5.4",
-    "workbox-window": "^6.5.4"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.6",
-    "@types/react-dom": "^18.2.4",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
+  "main": "src/index.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "serve": "serve -s build -p 3000"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -55,5 +28,31 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "."
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.11.0",
+    "axios": "^1.4.0",
+    "socket.io-client": "^4.6.2",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.13.0",
+    "@mui/icons-material": "^5.13.0",
+    "@mui/lab": "^5.0.0-alpha.130",
+    "react-window": "^1.8.8",
+    "react-window-infinite-loader": "^1.0.9",
+    "date-fns": "^2.30.0",
+    "emoji-picker-react": "^4.4.9",
+    "react-dropzone": "^14.2.3",
+    "react-hotkeys-hook": "^4.4.0",
+    "workbox-webpack-plugin": "^6.5.4",
+    "workbox-window": "^6.5.4",
+    "react-scripts": "5.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  }
 }

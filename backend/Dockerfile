@@ -11,7 +11,7 @@ RUN apk add --no-cache     curl     tzdata     && ln -sf /usr/share/zoneinfo/Eur
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --omit=dev --ignore-scripts && npm cache clean --force
 
 # Копируем исходный код
 COPY . .
