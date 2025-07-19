@@ -9,7 +9,7 @@ class AmoService {
         this.clientSecret = process.env.AMO_CLIENT_SECRET;
         this.redirectUri = process.env.AMO_REDIRECT_URI || `http://localhost:${process.env.PORT || 3001}/api/amo/callback`;
         this.baseURL = `https://${this.subdomain}.amocrm.ru/api/v4`;
-        this.authURL = `https://${this.subdomain}.amocrm.ru/oauth2`;
+        this.authURL = `https://${this.subdomain}.amocrm.ru/oauth`;
 
         this.accessToken = process.env.AMO_ACCESS_TOKEN;
         this.refreshToken = process.env.AMO_REFRESH_TOKEN;
@@ -71,7 +71,7 @@ class AmoService {
             state: 'whatsapp_integration_' + Date.now()
         });
 
-        return `${this.authURL}/authorize?${params.toString()}`;
+        return `${this.authURL}?${params.toString()}`;
     }
 
     // Обмен кода на токены
