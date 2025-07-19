@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main] # или твоя ветка
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH, Build and Up Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            PROJECT_DIR=lobzik-tg-bot
+            REPO_URL="git@github.com:${GITHUB_REPOSITORY}.git"
+
+            # Добавляем ключ github.com в known_hosts, чтобы избежать host key verification failed
+            mkdir -p ~/.ssh
+            ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "Директория $PROJECT_DIR не найдена, клонируем репозиторий..."
+              git clone $REPO_URL $PROJECT_DIR
+            else
+              echo "Директория $PROJECT_DIR найдена, обновляем репозиторий..."
+              cd $PROJECT_DIR
+              git pull origin main
+              cd ..
+            fi
+
+            cd $PROJECT_DIR
+
+            docker image prune -f
+            docker compose build
+            docker compose up -d --remove-orphans
