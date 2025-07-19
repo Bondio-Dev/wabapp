@@ -1,3 +1,5 @@
+// src/contexts/SocketContext.js
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
@@ -16,12 +18,17 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+    // Автоматически подставляем протокол и хост
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const host = window.location.hostname;
+    const port = process.env.REACT_APP_API_PORT || window.location.port || '3001';
+    const socketUrl = `${protocol}://${host}:${port}`;
 
-    const newSocket = io(API_URL, {
-      transports: ['websocket', 'polling'],
-      timeout: 20000,
+    const newSocket = io(socketUrl, {
+      transports: ['websocket'],
+      path: '/socket.io',
       autoConnect: true,
+      timeout: 20000
     });
 
     newSocket.on('connect', () => {
@@ -47,31 +54,25 @@ export const SocketProvider = ({ children }) => {
     setSocket(newSocket);
 
     return () => {
+      newSocket.off();
       newSocket.close();
     };
   }, []);
 
   const joinChat = (chatId) => {
-    if (socket) {
+    if (socket && connected) {
       socket.emit('join_chat', chatId);
     }
   };
 
   const leaveChat = (chatId) => {
-    if (socket) {
+    if (socket && connected) {
       socket.emit('leave_chat', chatId);
     }
   };
 
-  const value = {
-    socket,
-    connected,
-    joinChat,
-    leaveChat,
-  };
-
   return (
-    <SocketContext.Provider value={value}>
+    <SocketContext.Provider value={{ socket, connected, joinChat, leaveChat }}>
       {children}
     </SocketContext.Provider>
   );
