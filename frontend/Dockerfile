@@ -1,42 +1,34 @@
-# Multi-stage build для оптимизации
-FROM node:18-alpine as builder
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
+# Аргументы для сборки
+ARG REACT_APP_API_URL=http://localhost:3001
+ARG REACT_APP_WS_URL=ws://localhost:3001
+
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_WS_URL=$REACT_APP_WS_URL
+
 # Копируем package.json
-COPY package*.json ./
-RUN npm install --omit=dev
-
-# Копируем исходники и собираем
-COPY . .
-RUN npm run build
-
-# Production образ с nginx
-FROM nginx:alpine
+COPY package.json ./
 
 # Устанавливаем зависимости
-RUN apk add --no-cache tzdata
-RUN ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+RUN npm install
 
-# Копируем собранные файлы
-COPY --from=builder /app/build /usr/share/nginx/html
+# Копируем исходный код
+COPY . .
+
+# Собираем приложение
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+
+# Копируем собранное приложение
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Копируем конфигурацию nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Создаем нон-рут пользователя
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-
-# Права доступа
-RUN chown -R nextjs:nodejs /usr/share/nginx/html
-RUN chown -R nextjs:nodejs /var/cache/nginx
-RUN chown -R nextjs:nodejs /var/log/nginx
-RUN chown -R nextjs:nodejs /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid
-RUN chown -R nextjs:nodejs /var/run/nginx.pid
-
-USER nextjs
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
