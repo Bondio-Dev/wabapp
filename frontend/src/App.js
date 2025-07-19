@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import { SocketProvider } from './contexts/SocketContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import ChatInterface from './components/ChatInterface';
 import Login from './components/Login';
 import Settings from './components/Settings';
@@ -101,38 +102,37 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <SocketProvider>
-          <Router>
-            <div className={`App ${isAMOWidget ? 'amo-widget' : ''} ${isMobile ? 'mobile' : 'desktop'}`}>
+      <NotificationProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <Router>
               <Routes>
-                <Route 
-                  path="/widget" 
-                  element={<AMOWidget amoData={amoData} />} 
-                />
-                <Route 
-                  path="/login" 
-                  element={<Login />} 
-                />
-                <Route 
-                  path="/settings" 
-                  element={<Settings />} 
-                />
                 <Route 
                   path="/" 
                   element={
                     <ChatInterface 
-                      isAMOWidget={isAMOWidget} 
+                      isAMOWidget={isAMOWidget}
                       amoData={amoData}
                       isMobile={isMobile}
                     />
                   } 
                 />
+                <Route path="/login" element={<Login />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route 
+                  path="/widget" 
+                  element={
+                    <AMOWidget 
+                      isAMOWidget={true}
+                      amoData={amoData}
+                    />
+                  } 
+                />
               </Routes>
-            </div>
-          </Router>
-        </SocketProvider>
-      </AuthProvider>
+            </Router>
+          </SocketProvider>
+        </AuthProvider>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }

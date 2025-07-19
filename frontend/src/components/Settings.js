@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Paper, Tabs, Tab } from '@mui/material';
 import axios from 'axios';
-import { useNotification } from '../context/NotificationContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 function Settings() {
   const [activeTab, setActiveTab] = useState(0);
@@ -38,7 +38,7 @@ function Settings() {
       .catch(error => {
         showError('Ошибка загрузки настроек');
       });
-  }, []);
+  }, [showError]);
 
   // Сохранение настроек
   const handleSave = () => {
