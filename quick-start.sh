@@ -9,7 +9,7 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
     echo "❌ Docker Compose не установлен. Установите Docker Compose."
     exit 1
 fi
@@ -114,10 +114,10 @@ read -p "Нажмите Enter когда отредактируете .env фа�
 echo "🏗️  Сборка и запуск контейнеров..."
 
 # Останавливаем существующие контейнеры
-docker-compose down 2>/dev/null
+docker compose down 2>/dev/null
 
 # Собираем и запускаем
-docker-compose up --build -d
+docker compose up --build -d
 
 echo ""
 echo "⏳ Ожидаем запуск сервисов..."
@@ -125,7 +125,7 @@ sleep 10
 
 # Проверяем статус
 echo "📊 Статус контейнеров:"
-docker-compose ps
+docker compose ps
 
 echo ""
 echo "🎉 Запуск завершен!"
@@ -154,7 +154,7 @@ echo "   2. Скопируйте URL авторизации"
 echo "   3. Пройдите авторизацию в AMO CRM"
 echo ""
 echo "🔧 Управление:"
-echo "   docker-compose logs -f    (логи)"
-echo "   docker-compose down       (остановка)"
-echo "   docker-compose restart    (перезапуск)"
+echo "   docker compose logs -f    (логи)"
+echo "   docker compose down       (остановка)"
+echo "   docker compose restart    (перезапуск)"
 echo ""
