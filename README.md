@@ -42,7 +42,7 @@ GUPSHUP_SOURCE_NUMBER=ваш_whatsapp_номер
 AMO_SUBDOMAIN=ваш_поддомен_amocrm
 AMO_CLIENT_ID=client_id_интеграции
 AMO_CLIENT_SECRET=client_secret_интеграции
-AMO_REDIRECT_URI=http://83.166.238.230:3001/api/amo/callback
+AMO_REDIRECT_URI=http://www.bondio.ru/api/amo/callback
 ```
 
 ### 3. Запуск
@@ -64,7 +64,7 @@ npm run pm2
 
 1. Зарегистрируйтесь на [gupshup.io](https://www.gupshup.io)
 2. Создайте WhatsApp Business приложение
-3. В настройках webhook укажите: `http://83.166.238.230:3001/webhook/gupshup`
+3. В настройках webhook укажите: `http://www.bondio.ru/webhook/gupshup`
 4. Скопируйте API Key и имя приложения в `.env`
 
 ### Настройка amoCRM
@@ -72,9 +72,9 @@ npm run pm2
 1. В amoCRM перейдите в Настройки → Интеграции
 2. Создайте собственную интеграцию
 3. Получите Client ID и Client Secret
-4. Укажите Redirect URI: `http://83.166.238.230:3001/api/amo/callback`
+4. Укажите Redirect URI: `http://www.bondio.ru/api/amo/callback`
 5. Заполните данные в `.env`
-6. Авторизуйтесь: откройте `http://83.166.238.230:3001/api/amo/auth`
+6. Авторизуйтесь: откройте `http://www.bondio.ru/api/amo/auth`
 
 ## 📡 API Endpoints
 
@@ -137,15 +137,15 @@ npm run pm2
 
 ```bash
 # Проверка здоровья
-curl http://83.166.238.230:3001/health
+curl http://www.bondio.ru/health
 
 # Отправка тестового сообщения
-curl -X POST http://83.166.238.230:3001/api/send-message \
+curl -X POST http://www.bondio.ru/api/send-message \
   -H "Content-Type: application/json" \
   -d '{"phone":"+79001234567","message":"Тестовое сообщение"}'
 
 # Проверка диалогов
-curl http://83.166.238.230:3001/api/dialogs
+curl http://www.bondio.ru/api/dialogs
 ```
 
 ### Логи

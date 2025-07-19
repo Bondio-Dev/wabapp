@@ -1,26 +1,30 @@
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: whatsapp-amo-mvp
+    container_name: wabapp_app
     restart: unless-stopped
+    env_file:
+      - ./.env
+    expose:
+      - "3001"
+    networks:
+      - wabapp
+
+  nginx:
+    image: nginx:alpine
+    container_name: wabapp_nginx
+    restart: unless-stopped
+    depends_on:
+      - app
     ports:
-      - "3001:3001"
-    environment:
-      # Укажите здесь переменные из вашего .env
-      - PORT=3001
-      - GUPSHUP_API_KEY=${GUPSHUP_API_KEY}
-      - GUPSHUP_APP_NAME=${GUPSHUP_APP_NAME}
-      - AMO_CLIENT_ID=${AMO_CLIENT_ID}
-      - AMO_CLIENT_SECRET=${AMO_CLIENT_SECRET}
-      - AMO_REDIRECT_URI=${AMO_REDIRECT_URI}
-      - BASE_URL=${BASE_URL}
+      - "80:80"
     volumes:
-      # Монтируем папку с .env, если нужно
-      - ./.env:/app/.env:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - wabapp
 
 networks:
-  default:
-    name: whatsapp-amo-net
+  wabapp:
+    driver: bridge
