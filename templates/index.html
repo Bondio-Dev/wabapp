@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Панель тестирования -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-vial me-2"></i>Тестирование подключений
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2 mb-3">
+                    <button type="button" class="btn btn-outline-success" onclick="testGupshup()">
+                        <i class="fab fa-whatsapp me-2"></i>Тест Gupshup API
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="testAmoCRM()">
+                        <i class="fas fa-handshake me-2"></i>Тест AmoCRM API
+                    </button>
+                </div>
+
+                <div id="test-results" class="mt-3"></div>
+
+                <!-- AmoCRM авторизация -->
+                <div class="mt-3" id="amocrm-auth-section">
+                    <hr>
+                    <p class="text-muted small">Для работы с AmoCRM необходима авторизация:</p>
+                    <a href="/api/amo/auth" class="btn btn-primary">
+                        <i class="fas fa-key me-2"></i>Авторизоваться в AmoCRM
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Отправка сообщений -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-paper-plane me-2"></i>Отправка сообщений
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="message-form">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Номер телефона</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="+7 xxx xxx xx xx" required>
+                        <div class="form-text">Формат: +7, 8 или просто цифры</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сообщение</label>
+                        <textarea class="form-control" id="message" rows="3" placeholder="Введите текст сообщения..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fab fa-whatsapp me-2"></i>Отправить в WhatsApp
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Логи и статус -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list-alt me-2"></i>Логи операций
+                </h5>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearLogs()">
+                    <i class="fas fa-trash me-1"></i>Очистить
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="logs" class="logs-container">
+                    <div class="text-muted">Логи операций будут отображаться здесь...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с результатами -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Результат операции</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="modalContent" class="bg-light p-3 rounded"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
