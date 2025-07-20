@@ -18,15 +18,8 @@
             padding: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .status {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .status { display: flex; justify-content: space-around; margin-bottom: 30px; }
         .status-card {
             background: #f8f9fa;
             padding: 20px;
@@ -34,106 +27,38 @@
             text-align: center;
             min-width: 150px;
         }
-        .status-card.active {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-        }
-        .status-card.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
+        .status-card.active { background: #d4edda; border: 1px solid #c3e6cb; }
+        .status-card.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
         input, textarea, button {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+            width: 100%; padding: 10px; border: 1px solid #ddd;
+            border-radius: 5px; font-size: 16px;
         }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: 500; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 30px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;
         }
-        .dialogs {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
+        .dialogs, .messages {
+            max-height: 400px; overflow-y: auto; border: 1px solid #ddd;
+            border-radius: 5px; padding: 10px;
         }
-        .dialog-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .dialog-item:hover {
-            background: #f8f9fa;
-        }
-        .messages {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        .message.incoming {
-            background: #e9ecef;
-            margin-right: 20px;
-        }
-        .message.outgoing {
-            background: #007bff;
-            color: white;
-            margin-left: 20px;
-        }
+        .dialog-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .dialog-item:hover { background: #f8f9fa; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 10px; }
+        .message.incoming { background: #e9ecef; margin-right: 20px; }
+        .message.outgoing { background: #007bff; color: white; margin-left: 20px; }
         .response {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            font-size: 12px;
+            margin: 20px auto; max-width: 800px; padding: 15px;
+            border-radius: 5px; font-family: monospace; font-size: 14px;
+            overflow-x: auto;
         }
-        .response.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-        }
-        .response.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
+        .response.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .response.error { background: #f8d7da; border: 1px solid #f5c6cb; }
         @media (max-width: 768px) {
-            .two-columns {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
+            .two-columns { grid-template-columns: 1fr; gap: 20px; }
         }
     </style>
 </head>
@@ -144,220 +69,156 @@
             <p>Тестовый интерфейс для отправки сообщений и просмотра диалогов</p>
         </div>
 
-        <!-- Статус сервисов -->
         <div class="status">
-            <div class="status-card" id="server-status">
-                <h4>🖥 Сервер</h4>
-                <div id="server-text">Проверка...</div>
-            </div>
-            <div class="status-card" id="gupshup-status">
-                <h4>📱 Gupshup</h4>
-                <div id="gupshup-text">Ожидание</div>
-            </div>
-            <div class="status-card" id="amo-status">
-                <h4>🏢 amoCRM</h4>
-                <div id="amo-text">Ожидание</div>
-            </div>
+            <div class="status-card" id="server-status"><h4>🖥 Сервер</h4><div id="server-text">Проверка...</div></div>
+            <div class="status-card" id="gupshup-status"><h4>📱 Gupshup</h4><div id="gupshup-text">Ожидание</div></div>
+            <div class="status-card" id="amo-status"><h4>🏢 amoCRM</h4><div id="amo-text">Ожидание</div></div>
         </div>
 
-        <!-- Форма отправки сообщения -->
         <div class="form-group">
             <h3>📤 Отправить сообщение</h3>
             <div style="display: grid; grid-template-columns: 1fr 2fr 100px; gap: 10px;">
                 <input type="text" id="phone" placeholder="+79001234567" value="+79001234567">
-                <textarea id="message" placeholder="Введите сообщение..." rows="2">Тестовое сообщение из веб-интерфейса</textarea>
+                <textarea id="message" rows="2">Тестовое сообщение из веб-интерфейса</textarea>
                 <button onclick="sendMessage()">Отправить</button>
             </div>
         </div>
 
-        <!-- Результат операции -->
-        <div id="response" class="response" style="display: none;"></div>
+        <div id="response" class="response" style="display:none;"></div>
 
-        <!-- Две колонки: диалоги и сообщения -->
         <div class="two-columns">
-            <!-- Список диалогов -->
             <div>
                 <h3>💬 Диалоги</h3>
-                <button onclick="loadDialogs()" style="margin-bottom: 10px;">🔄 Обновить список</button>
+                <button onclick="loadDialogs()">🔄 Обновить список</button>
                 <div id="dialogs" class="dialogs">
-                    <div style="text-align: center; padding: 20px; color: #666;">
-                        Нажмите "Обновить список" для загрузки диалогов
-                    </div>
+                    <div style="text-align:center;padding:20px;color:#666;">Нажмите "Обновить список"</div>
                 </div>
             </div>
-
-            <!-- История сообщений -->
             <div>
                 <h3>📜 История сообщений</h3>
-                <div id="current-phone" style="margin-bottom: 10px; font-weight: 500;"></div>
+                <div id="current-phone" style="margin-bottom:10px;font-weight:500;"></div>
                 <div id="messages" class="messages">
-                    <div style="text-align: center; padding: 20px; color: #666;">
-                        Выберите диалог для просмотра сообщений
-                    </div>
+                    <div style="text-align:center;padding:20px;color:#666;">Выберите диалог</div>
                 </div>
             </div>
         </div>
+
+        <!-- Кнопка тестирования интеграции -->
+        <div style="text-align:center;margin:30px 0;">
+            <button id="test-btn">Проверить интеграцию</button>
+        </div>
+        <pre id="test-output" class="response" style="display:none;"></pre>
     </div>
 
     <script>
         const API_BASE = window.location.origin;
 
-        // Проверка статуса сервера при загрузке
-        document.addEventListener('DOMContentLoaded', checkServerStatus);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkServerStatus();
+            setInterval(checkServerStatus, 60000);
+            setInterval(loadDialogs, 30000);
+        });
 
         async function checkServerStatus() {
             try {
-                const response = await fetch(`${API_BASE}/health`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    updateStatus('server', 'active', `Работает\nUptime: ${Math.floor(data.uptime)}s`);
-                } else {
-                    updateStatus('server', 'error', 'Ошибка');
-                }
-            } catch (error) {
-                updateStatus('server', 'error', 'Недоступен');
-                console.error('Ошибка проверки статуса:', error);
+                const r = await fetch(`${API_BASE}/health`);
+                const data = await r.json();
+                updateStatus('server','active',`Работает\nUptime: ${Math.floor(data.uptime)}s`);
+            } catch {
+                updateStatus('server','error','Недоступен');
             }
         }
-
-        function updateStatus(service, status, text) {
-            const element = document.getElementById(`${service}-status`);
-            const textElement = document.getElementById(`${service}-text`);
-
-            element.className = `status-card ${status}`;
-            textElement.textContent = text;
+        function updateStatus(id,status,text) {
+            document.getElementById(`${id}-status`).className = `status-card ${status}`;
+            document.getElementById(`${id}-text`).textContent = text;
         }
 
         async function sendMessage() {
+            const btn = event.target;
             const phone = document.getElementById('phone').value.trim();
             const message = document.getElementById('message').value.trim();
-            const button = event.target;
-
-            if (!phone || !message) {
-                showResponse('error', 'Заполните номер телефона и сообщение');
-                return;
-            }
-
-            button.disabled = true;
-            button.textContent = 'Отправка...';
-
+            if(!phone||!message){ showResponse('error','Заполните все'); return; }
+            btn.disabled=true; btn.textContent='Отправка...';
+            updateStatus('gupshup','','Отправка...');
             try {
-                updateStatus('gupshup', '', 'Отправка...');
-
-                const response = await fetch(`${API_BASE}/api/send-message`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, message })
+                const r = await fetch(`${API_BASE}/api/send-message`,{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({phone,message})
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showResponse('success', `✅ Сообщение отправлено!\n\nОтвет от Gupshup:\n${JSON.stringify(result, null, 2)}`);
-                    updateStatus('gupshup', 'active', 'Отправлено');
-                    updateStatus('amo', 'active', 'Обновлено');
-
-                    // Очищаем поле сообщения
-                    document.getElementById('message').value = '';
-
-                    // Обновляем диалоги
-                    setTimeout(loadDialogs, 1000);
+                const j=await r.json();
+                if(j.success){
+                    showResponse('success',`✅ Отправлено\n${JSON.stringify(j,0,2)}`);
+                    updateStatus('gupshup','active','Отправлено');
+                    updateStatus('amo','active','Обновлено');
+                    document.getElementById('message').value='';
+                    setTimeout(loadDialogs,1000);
                 } else {
-                    showResponse('error', `❌ Ошибка отправки:\n${result.error || 'Неизвестная ошибка'}\n\nОтвет:\n${JSON.stringify(result, null, 2)}`);
-                    updateStatus('gupshup', 'error', 'Ошибка');
+                    showResponse('error',`❌ Ошибка\n${j.error||''}`);
+                    updateStatus('gupshup','error','Ошибка');
                 }
-            } catch (error) {
-                showResponse('error', `❌ Сетевая ошибка:\n${error.message}`);
-                updateStatus('gupshup', 'error', 'Недоступен');
-                console.error('Ошибка отправки:', error);
+            } catch(e){
+                showResponse('error',`❌ Сетевая ошибка\n${e.message}`);
+                updateStatus('gupshup','error','Недоступен');
             } finally {
-                button.disabled = false;
-                button.textContent = 'Отправить';
+                btn.disabled=false; btn.textContent='Отправить';
             }
         }
 
         async function loadDialogs() {
-            const dialogsElement = document.getElementById('dialogs');
-            dialogsElement.innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Загрузка...</div>';
-
+            const el=document.getElementById('dialogs');
+            el.innerHTML='<div style="text-align:center;padding:20px;">🔄 Загрузка...</div>';
             try {
-                const response = await fetch(`${API_BASE}/api/dialogs`);
-                const dialogs = await response.json();
-
-                if (Array.isArray(dialogs) && dialogs.length > 0) {
-                    dialogsElement.innerHTML = dialogs.map(dialog => `
-                        <div class="dialog-item" onclick="loadMessages('${dialog.phone}')">
-                            <div style="font-weight: 500;">${dialog.phone}</div>
-                            <div style="color: #666; font-size: 12px;">
-                                Сообщений: ${dialog.messageCount}
-                                ${dialog.lastMessage ? `<br>Последнее: ${dialog.lastMessage.text.substring(0, 50)}...` : ''}
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    dialogsElement.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Диалогов пока нет</div>';
-                }
-            } catch (error) {
-                dialogsElement.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Ошибка загрузки</div>';
-                console.error('Ошибка загрузки диалогов:', error);
+                const r=await fetch(`${API_BASE}/api/dialogs`);
+                const d=await r.json();
+                el.innerHTML = d.length
+                    ? d.map(x=>`<div class="dialog-item" onclick="loadMessages('${x.phone}')">
+                        <div>${x.phone}</div><small>Сообщений: ${x.messageCount}</small>
+                      </div>`).join('')
+                    : '<div style="text-align:center;padding:20px;color:#666;">Диалогов нет</div>';
+            } catch {
+                el.innerHTML='<div style="text-align:center;padding:20px;color:#e74c3c;">Ошибка</div>';
             }
         }
 
-        async function loadMessages(phone) {
-            const messagesElement = document.getElementById('messages');
-            const phoneElement = document.getElementById('current-phone');
+        async function loadMessages(phone){
+            document.getElementById('current-phone').textContent=`Диалог: ${phone}`;
+            const el=document.getElementById('messages');
+            el.innerHTML='<div style="text-align:center;padding:20px;">🔄 Загрузка...</div>';
+            try{
+                const r=await fetch(`${API_BASE}/api/dialog/${encodeURIComponent(phone)}`);
+                const d=await r.json();
+                el.innerHTML = d.messages.length
+                    ? d.messages.map(m=>`<div class="message ${m.type}">${m.message}<br><small>${new Date(m.timestamp).toLocaleString()}</small></div>`).join('')
+                    : '<div style="text-align:center;padding:20px;color:#666;">Пусто</div>';
+                el.scrollTop=el.scrollHeight;
+            }catch{
+                el.innerHTML='<div style="text-align:center;padding:20px;color:#e74c3c;">Ошибка</div>';
+            }
+        }
 
-            phoneElement.textContent = `Диалог с ${phone}`;
-            messagesElement.innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Загрузка...</div>';
+        function showResponse(type,text){
+            const r=document.getElementById('response');
+            r.className=`response ${type}`; r.textContent=text; r.style.display='block';
+            if(type==='success') setTimeout(()=>r.style.display='none',10000);
+        }
 
+        // Обработчик кнопки тестирования
+        document.getElementById('test-btn').addEventListener('click', async () => {
+            const btn=document.getElementById('test-btn');
+            const out=document.getElementById('test-output');
+            btn.disabled=true; btn.textContent='Проверка...';
+            out.style.display='none'; out.textContent='';
             try {
-                const response = await fetch(`${API_BASE}/api/dialog/${encodeURIComponent(phone)}`);
-                const data = await response.json();
-
-                if (data.messages && data.messages.length > 0) {
-                    messagesElement.innerHTML = data.messages.map(msg => `
-                        <div class="message ${msg.type}">
-                            <div>${msg.message}</div>
-                            <div style="font-size: 11px; opacity: 0.7; margin-top: 5px;">
-                                ${new Date(msg.timestamp).toLocaleString('ru')}
-                            </div>
-                        </div>
-                    `).join('');
-
-                    // Прокручиваем в конец
-                    messagesElement.scrollTop = messagesElement.scrollHeight;
-                } else {
-                    messagesElement.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Сообщений пока нет</div>';
-                }
-            } catch (error) {
-                messagesElement.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Ошибка загрузки</div>';
-                console.error('Ошибка загрузки сообщений:', error);
+                const r=await fetch(`${API_BASE}/api/test-connection`);
+                const j=await r.json();
+                out.textContent=JSON.stringify(j,null,2);
+                out.className=j.gupshup?.error||j.amo?.error?'response error':'response success';
+            }catch(e){
+                out.textContent='Ошибка: '+e.message; out.className='response error';
+            }finally{
+                out.style.display='block'; btn.disabled=false; btn.textContent='Проверить интеграцию';
             }
-        }
-
-        function showResponse(type, text) {
-            const responseElement = document.getElementById('response');
-            responseElement.className = `response ${type}`;
-            responseElement.textContent = text;
-            responseElement.style.display = 'block';
-
-            // Прокручиваем к результату
-            responseElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            // Автоматически скрываем через 10 секунд для успешных операций
-            if (type === 'success') {
-                setTimeout(() => {
-                    responseElement.style.display = 'none';
-                }, 10000);
-            }
-        }
-
-        // Автообновление диалогов каждые 30 секунд
-        setInterval(loadDialogs, 30000);
-
-        // Автообновление статуса каждые 60 секунд  
-        setInterval(checkServerStatus, 60000);
+        });
     </script>
 </body>
 </html>

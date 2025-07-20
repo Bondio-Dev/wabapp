@@ -8,18 +8,19 @@ class AmoService {
         this.clientId = process.env.AMO_CLIENT_ID;
         this.clientSecret = process.env.AMO_CLIENT_SECRET;
         this.redirectUri = process.env.AMO_REDIRECT_URI || `http://localhost:${process.env.PORT || 3001}/api/amo/callback`;
-        this.baseURL = `https://${this.subdomain}.amocrm.ru/api/v4`;
-        this.authURL = `https://${this.subdomain}.amocrm.ru/oauth`;
+        this.apiBaseURL = `https://${this.subdomain}.amocrm.ru/api/v4`;
+        this.authBaseURL = `https://www.amocrm.ru/oauth`;                       // ++ изменено на www.amocrm.ru
+        this.tokenURL    = `https://${this.subdomain}.amocrm.ru/oauth2/access_token`;
 
-        this.accessToken = process.env.AMO_ACCESS_TOKEN;
+        this.accessToken  = process.env.AMO_ACCESS_TOKEN;
         this.refreshToken = process.env.AMO_REFRESH_TOKEN;
 
         if (!this.subdomain || !this.clientId || !this.clientSecret) {
-            console.warn('⚠️  amoCRM настройки неполные - проверьте AMO_SUBDOMAIN, AMO_CLIENT_ID, AMO_CLIENT_SECRET');
+            console.warn('⚠️ amoCRM: проверьте AMO_SUBDOMAIN, AMO_CLIENT_ID, AMO_CLIENT_SECRET');
         }
 
-        // Создаем axios client для API запросов
         this.client = axios.create({
+            baseURL: this.apiBaseURL,
             timeout: 30000,
             headers: {
                 'Content-Type': 'application/json',
@@ -27,8 +28,7 @@ class AmoService {
             }
         });
 
-        // Добавляем автоматическое обновление токенов
-        this.client.interceptors.request.use(async (config) => {
+        this.client.interceptors.request.use(config => {
             if (this.accessToken) {
                 config.headers.Authorization = `Bearer ${this.accessToken}`;
             }
@@ -36,22 +36,18 @@ class AmoService {
         });
 
         this.client.interceptors.response.use(
-            (response) => response,
-            async (error) => {
-                const originalRequest = error.config;
-
-                if (error.response?.status === 401 && !originalRequest._retry && this.refreshToken) {
-                    originalRequest._retry = true;
-
-                    console.log('🔄 Токен истёк, обновляем...');
-                    const newTokens = await this.refreshAccessToken();
-
-                    if (newTokens.success) {
-                        originalRequest.headers.Authorization = `Bearer ${this.accessToken}`;
-                        return this.client.request(originalRequest);
+            response => response,
+            async error => {
+                const original = error.config;
+                if (error.response?.status === 401 && !original._retry && this.refreshToken) {
+                    original._retry = true;
+                    console.log('🔄 amoCRM: access_token истёк, обновляем');
+                    const refreshed = await this.refreshAccessToken();
+                    if (refreshed.success) {
+                        original.headers.Authorization = `Bearer ${this.accessToken}`;
+                        return this.client.request(original);
                     }
                 }
-
                 return Promise.reject(error);
             }
         );
@@ -59,126 +55,99 @@ class AmoService {
 
     // Генерация URL для OAuth авторизации
     getAuthUrl() {
-        if (!this.subdomain || !this.clientId) {
-            throw new Error('Настройки amoCRM неполные для генерации URL авторизации');
+        if (!this.clientId) {
+            throw new Error('amoCRM: неполный clientId для OAuth');
         }
-
         const params = new URLSearchParams({
-            client_id: this.clientId,
+            client_id:     this.clientId,
+            redirect_uri:  this.redirectUri,
             response_type: 'code',
-            redirect_uri: this.redirectUri,
-            scope: 'crm',
-            state: 'whatsapp_integration_' + Date.now()
+            state:         'whatsapp_integration_' + Date.now()
         });
-
-        return `${this.authURL}?${params.toString()}`;
+        return `${this.authBaseURL}?${params.toString()}`;
     }
 
-    // Обмен кода на токены
+    // Обмен authorization code на токены
     async exchangeCodeForTokens(code) {
         try {
-            console.log('🔑 Обмен кода на токены...');
-
-            const data = {
-                client_id: this.clientId,
+            console.log('🔑 amoCRM: обмениваем code на токены...');
+            const payload = {
+                client_id:     this.clientId,
                 client_secret: this.clientSecret,
-                grant_type: 'authorization_code',
-                code: code,
-                redirect_uri: this.redirectUri
+                grant_type:    'authorization_code',
+                code,
+                redirect_uri:  this.redirectUri
             };
-
-            const response = await axios.post(`${this.authURL}/access_token`, data, {
+            const resp = await axios.post(this.tokenURL, payload, {
                 headers: { 'Content-Type': 'application/json' }
             });
-
-            if (response.data.access_token) {
-                this.accessToken = response.data.access_token;
-                this.refreshToken = response.data.refresh_token;
-
-                // Обновляем .env файл
-                await this.updateEnvFile({
-                    AMO_ACCESS_TOKEN: this.accessToken,
-                    AMO_REFRESH_TOKEN: this.refreshToken
-                });
-
-                console.log('✅ Токены получены и сохранены в .env');
-
-                return {
-                    success: true,
-                    access_token: this.accessToken,
-                    refresh_token: this.refreshToken,
-                    expires_in: response.data.expires_in
-                };
-            } else {
-                throw new Error('Токены не получены от amoCRM');
+            const data = resp.data;
+            if (!data.access_token) {
+                throw new Error('amoCRM: access_token не получен');
             }
-
-        } catch (error) {
-            console.error('❌ Ошибка получения токенов:', error.response?.data || error.message);
+            this.accessToken  = data.access_token;
+            this.refreshToken = data.refresh_token;
+            await this.updateEnvFile({
+                AMO_ACCESS_TOKEN:  this.accessToken,
+                AMO_REFRESH_TOKEN: this.refreshToken
+            });
+            console.log('✅ amoCRM: токены сохранены');
+            return {
+                success:       true,
+                access_token:  data.access_token,
+                refresh_token: data.refresh_token,
+                expires_in:    data.expires_in
+            };
+        } catch (err) {
+            console.error('❌ amoCRM exchangeCode:', err.response?.data || err.message);
             return {
                 success: false,
-                error: error.response?.data?.hint || error.message
+                error:   err.response?.data?.hint || err.message
             };
         }
     }
 
-    // Обновление access token
+    // Обновление access_token по refresh_token
     async refreshAccessToken() {
         try {
-            if (!this.refreshToken) {
-                throw new Error('Refresh token отсутствует');
-            }
-
-            const data = {
-                client_id: this.clientId,
+            if (!this.refreshToken) throw new Error('amoCRM: no refresh_token');
+            const payload = {
+                client_id:     this.clientId,
                 client_secret: this.clientSecret,
-                grant_type: 'refresh_token',
+                grant_type:    'refresh_token',
                 refresh_token: this.refreshToken,
-                redirect_uri: this.redirectUri
+                redirect_uri:  this.redirectUri
             };
-
-            const response = await axios.post(`${this.authURL}/access_token`, data, {
+            const resp = await axios.post(this.tokenURL, payload, {
                 headers: { 'Content-Type': 'application/json' }
             });
-
-            if (response.data.access_token) {
-                this.accessToken = response.data.access_token;
-                this.refreshToken = response.data.refresh_token;
-
-                await this.updateEnvFile({
-                    AMO_ACCESS_TOKEN: this.accessToken,
-                    AMO_REFRESH_TOKEN: this.refreshToken
-                });
-
-                console.log('✅ Токены обновлены');
-                return { success: true };
-            }
-
-        } catch (error) {
-            console.error('❌ Ошибка обновления токенов:', error.response?.data || error.message);
-            return { success: false, error: error.message };
+            const data = resp.data;
+            if (!data.access_token) throw new Error('amoCRM: refresh failed');
+            this.accessToken  = data.access_token;
+            this.refreshToken = data.refresh_token;
+            await this.updateEnvFile({
+                AMO_ACCESS_TOKEN:  this.accessToken,
+                AMO_REFRESH_TOKEN: this.refreshToken
+            });
+            console.log('✅ amoCRM: токены обновлены');
+            return { success: true };
+        } catch (err) {
+            console.error('❌ amoCRM refreshAccessToken:', err.response?.data || err.message);
+            return { success: false, error: err.message };
         }
     }
 
     // Поиск контакта по телефону
     async findContactByPhone(phone) {
         try {
-            const formattedPhone = phone.replace(/[^\d]/g, '');
-
-            const response = await this.client.get(`${this.baseURL}/contacts`, {
-                params: {
-                    query: formattedPhone,
-                    limit: 1
-                }
+            const formatted = phone.replace(/\D/g, '');
+            const resp = await this.client.get('/contacts', {
+                params: { query: formatted, limit: 1 }
             });
-
-            if (response.data._embedded?.contacts?.length > 0) {
-                return response.data._embedded.contacts[0];
-            }
-
-            return null;
-        } catch (error) {
-            console.error('❌ Ошибка поиска контакта:', error.response?.data || error.message);
+            const contacts = resp.data._embedded?.contacts;
+            return contacts && contacts.length > 0 ? contacts[0] : null;
+        } catch (err) {
+            console.error('❌ amoCRM findContactByPhone:', err.response?.data || err.message);
             return null;
         }
     }
@@ -186,267 +155,131 @@ class AmoService {
     // Создание контакта
     async createContact(phone, name = null) {
         try {
-            const formattedPhone = phone.replace(/[^\d]/g, '');
-            const contactName = name || `WhatsApp +${formattedPhone}`;
-
-            console.log(`👤 Создание контакта: ${contactName} (${phone})`);
-
+            const formatted = phone.replace(/\D/g, '');
+            const contactName = name || `WhatsApp +${formatted}`;
             const contactData = {
                 name: contactName,
                 custom_fields_values: [
                     {
                         field_code: 'PHONE',
-                        values: [
-                            {
-                                value: formattedPhone,
-                                enum_code: 'WORK'
-                            }
-                        ]
+                        values: [{ value: formatted, enum_code: 'WORK' }]
                     }
                 ],
-                tags: [
-                    {
-                        name: 'WhatsApp'
-                    }
-                ]
+                tags: [{ name: 'WhatsApp' }]
             };
-
-            const response = await this.client.post(`${this.baseURL}/contacts`, [contactData]);
-
-            if (response.data._embedded?.contacts?.length > 0) {
-                const contact = response.data._embedded.contacts[0];
-                console.log(`✅ Контакт создан: ID ${contact.id}`);
-                return contact;
-            }
-
+            const resp = await this.client.post('/contacts', [contactData]);
+            const contacts = resp.data._embedded?.contacts;
+            if (contacts && contacts.length > 0) return contacts[0];
             throw new Error('Контакт не создался');
-
-        } catch (error) {
-            console.error('❌ Ошибка создания контакта:', error.response?.data || error.message);
-            throw error;
+        } catch (err) {
+            console.error('❌ amoCRM createContact:', err.response?.data || err.message);
+            throw err;
         }
     }
 
-    // Поиск или создание сделки для контакта
+    // Поиск или создание сделки
     async findOrCreateLead(contactId, phone) {
         try {
-            // Ищем открытые сделки контакта
-            const response = await this.client.get(`${this.baseURL}/leads`, {
-                params: {
-                    'filter[contacts][0]': contactId,
-                    'filter[statuses][0][pipeline_id]': process.env.AMO_PIPELINE_ID || 0,
-                    limit: 1
-                }
+            const resp = await this.client.get('/leads', {
+                params: { 'filter[contacts][0]': contactId, limit: 1 }
             });
-
-            if (response.data._embedded?.leads?.length > 0) {
-                return response.data._embedded.leads[0];
-            }
-
-            // Создаем новую сделку
-            console.log(`📊 Создание сделки для контакта ${contactId}`);
-
+            const leads = resp.data._embedded?.leads;
+            if (leads && leads.length > 0) return leads[0];
             const leadData = {
-                name: `WhatsApp диалог +${phone.replace(/[^\d]/g, '')}`,
-                price: 0,
-                contacts: {
-                    id: contactId
-                },
-                tags: [
-                    {
-                        name: 'WhatsApp'
-                    }
-                ]
+                name:     `WhatsApp диалог +${phone.replace(/\D/g, '')}`,
+                price:    0,
+                contacts: { id: contactId },
+                tags:     [{ name: 'WhatsApp' }]
             };
-
-            if (process.env.AMO_PIPELINE_ID) {
-                leadData.pipeline_id = parseInt(process.env.AMO_PIPELINE_ID);
-            }
-
-            if (process.env.AMO_STATUS_ID) {
-                leadData.status_id = parseInt(process.env.AMO_STATUS_ID);
-            }
-
-            const leadResponse = await this.client.post(`${this.baseURL}/leads`, [leadData]);
-
-            if (leadResponse.data._embedded?.leads?.length > 0) {
-                const lead = leadResponse.data._embedded.leads[0];
-                console.log(`✅ Сделка создана: ID ${lead.id}`);
-                return lead;
-            }
-
+            const createResp = await this.client.post('/leads', [leadData]);
+            const newLeads = createResp.data._embedded?.leads;
+            if (newLeads && newLeads.length > 0) return newLeads[0];
             throw new Error('Сделка не создалась');
-
-        } catch (error) {
-            console.error('❌ Ошибка работы со сделкой:', error.response?.data || error.message);
-            throw error;
+        } catch (err) {
+            console.error('❌ amoCRM findOrCreateLead:', err.response?.data || err.message);
+            throw err;
         }
     }
 
     // Добавление примечания
-    async addNote(contactId, leadId, text, noteType = 4) {
+    async addNote(contactId, leadId, text) {
         try {
-            const noteData = {
-                note_type: noteType, // 4 = обычное примечание
-                params: {
-                    text: text
-                }
-            };
-
+            const noteData = { note_type: 4, params: { text } };
             if (leadId) {
-                noteData.entity_id = leadId;
+                noteData.entity_id   = leadId;
                 noteData.entity_type = 'leads';
-            } else if (contactId) {
-                noteData.entity_id = contactId;
-                noteData.entity_type = 'contacts';
             } else {
-                throw new Error('Необходим либо contactId, либо leadId');
+                noteData.entity_id   = contactId;
+                noteData.entity_type = 'contacts';
             }
-
-            const response = await this.client.post(`${this.baseURL}/notes`, [noteData]);
-
-            if (response.data._embedded?.notes?.length > 0) {
-                console.log(`📝 Примечание добавлено: "${text.substring(0, 50)}..."`);
-                return response.data._embedded.notes[0];
-            }
-
-            throw new Error('Примечание не создалось');
-
-        } catch (error) {
-            console.error('❌ Ошибка добавления примечания:', error.response?.data || error.message);
-            throw error;
+            const resp = await this.client.post('/notes', [noteData]);
+            return resp.data._embedded?.notes?.[0] || null;
+        } catch (err) {
+            console.error('❌ amoCRM addNote:', err.response?.data || err.message);
+            throw err;
         }
     }
 
     // Обработка входящего сообщения
     async processIncomingMessage(phone, message) {
         try {
-            console.log(`📥 Обработка входящего сообщения от ${phone}: ${message.substring(0, 100)}...`);
-
-            // Ищем контакт
             let contact = await this.findContactByPhone(phone);
-
-            // Создаем контакт, если не найден
-            if (!contact) {
-                contact = await this.createContact(phone);
-            }
-
-            // Ищем или создаем сделку
+            if (!contact) contact = await this.createContact(phone);
             const lead = await this.findOrCreateLead(contact.id, phone);
-
-            // Добавляем сообщение как примечание
-            const noteText = `📥 WhatsApp: ${message}\n\nВремя: ${new Date().toLocaleString('ru')}`;
-            await this.addNote(contact.id, lead.id, noteText);
-
-            console.log(`✅ Входящее сообщение обработано для контакта ${contact.id}`);
-
-            return {
-                success: true,
-                contact,
-                lead,
-                message: 'Сообщение добавлено в amoCRM'
-            };
-
-        } catch (error) {
-            console.error('❌ Ошибка обработки входящего сообщения:', error.message);
-            return {
-                success: false,
-                error: error.message
-            };
+            const note = `📥 WhatsApp: ${message}`;
+            await this.addNote(contact.id, lead.id, note);
+            return { success: true };
+        } catch (err) {
+            console.error('❌ amoCRM processIncomingMessage:', err.message);
+            return { success: false, error: err.message };
         }
     }
 
-    // Добавление сообщения к контакту
-    async addMessageToContact(phone, message, direction = 'outgoing') {
+    // Добавление исходящего сообщения
+    async addMessageToContact(phone, message) {
         try {
             let contact = await this.findContactByPhone(phone);
-
-            if (!contact) {
-                contact = await this.createContact(phone);
-            }
-
+            if (!contact) contact = await this.createContact(phone);
             const lead = await this.findOrCreateLead(contact.id, phone);
-
-            const icon = direction === 'outgoing' ? '📤' : '📥';
-            const noteText = `${icon} WhatsApp: ${message}\n\nВремя: ${new Date().toLocaleString('ru')}`;
-
-            await this.addNote(contact.id, lead.id, noteText);
-
-            return { success: true, contact, lead };
-
-        } catch (error) {
-            console.error('❌ Ошибка добавления сообщения:', error.message);
-            return { success: false, error: error.message };
+            const note = `📤 WhatsApp: ${message}`;
+            await this.addNote(contact.id, lead.id, note);
+            return { success: true };
+        } catch (err) {
+            console.error('❌ amoCRM addMessageToContact:', err.message);
+            return { success: false, error: err.message };
         }
     }
 
     // Обновление .env файла
-    async updateEnvFile(newVars) {
+    async updateEnvFile(vars) {
         try {
             const envPath = path.join(process.cwd(), '.env');
-            let envContent = '';
-
-            if (fs.existsSync(envPath)) {
-                envContent = fs.readFileSync(envPath, 'utf8');
-            }
-
-            Object.keys(newVars).forEach(key => {
-                const value = newVars[key];
-                const pattern = new RegExp(`^${key}=.*`, 'm');
-
-                if (pattern.test(envContent)) {
-                    envContent = envContent.replace(pattern, `${key}=${value}`);
+            let content = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+            for (const [k, v] of Object.entries(vars)) {
+                const regex = new RegExp(`^${k}=.*`, 'm');
+                if (regex.test(content)) {
+                    content = content.replace(regex, `${k}=${v}`);
                 } else {
-                    envContent += `\n${key}=${value}`;
+                    content += `\n${k}=${v}`;
                 }
-            });
-
-            fs.writeFileSync(envPath, envContent.trim() + '\n');
-
-            // Обновляем process.env
-            Object.keys(newVars).forEach(key => {
-                process.env[key] = newVars[key];
-            });
-
-        } catch (error) {
-            console.error('❌ Ошибка обновления .env:', error.message);
+            }
+            fs.writeFileSync(envPath, content.trim() + '\n');
+            Object.assign(process.env, vars);
+        } catch (err) {
+            console.error('❌ amoCRM updateEnvFile:', err.message);
         }
     }
 
-    // Получение информации об аккаунте
-    async getAccountInfo() {
-        try {
-            const response = await this.client.get(`${this.baseURL}/account`);
-            return response.data;
-        } catch (error) {
-            console.error('❌ Ошибка получения информации об аккаунте:', error.response?.data || error.message);
-            return null;
-        }
-    }
-
-    // Проверка подключения
+    // Тест подключения к API amoCRM
     async testConnection() {
         try {
             if (!this.accessToken) {
-                return { success: false, error: 'Токен доступа не настроен' };
+                return { success: false, error: 'AMO_ACCESS_TOKEN не задан' };
             }
-
-            const account = await this.getAccountInfo();
-
-            if (account) {
-                return { 
-                    success: true, 
-                    account: account.name,
-                    subdomain: this.subdomain
-                };
-            } else {
-                return { success: false, error: 'Не удалось получить данные аккаунта' };
-            }
-        } catch (error) {
-            return { 
-                success: false, 
-                error: error.message 
-            };
+            const resp = await this.client.get('/account');
+            return { success: true, account: resp.data.name };
+        } catch (err) {
+            return { success: false, error: err.response?.data?.status || err.message };
         }
     }
 }
